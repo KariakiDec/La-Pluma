@@ -1,0 +1,23 @@
+{
+  "beep": {
+    "category": "master",
+    "subtitle": "lapluma.sound.beep",
+    "sounds": [
+      "lapluma:beep"
+    ]
+  },
+  "click": {
+    "category": "master",
+    "subtitle": "lapluma.sound.click",
+    "sounds": [
+      "lapluma:click"
+    ]
+  },
+  "music": {
+    "category": "records",
+    "subtitle": "lapluma.sound.music",
+    "sounds": [
+      "random/orb"
+    ]
+  }
+}
