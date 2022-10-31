@@ -1,5 +1,6 @@
 package cn.earthsky.dev.project.lapluma;
 
+import cn.earthsky.dev.project.lapluma.common.commands.PlayJournalCommand;
 import de.cuina.fireandfuel.CodecJLayerMP3;
 import cn.earthsky.dev.project.lapluma.client.KeyLoader;
 import cn.earthsky.dev.project.lapluma.client.gui.GuiDialog;
@@ -13,6 +14,7 @@ import net.minecraft.client.resources.*;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.sound.SoundSetupEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -78,7 +80,7 @@ public class LaPluma {
      */
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-
+        ClientCommandHandler.instance.registerCommand(new PlayJournalCommand());
         KeyLoader.init();
     }
 

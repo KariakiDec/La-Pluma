@@ -21,6 +21,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -172,6 +173,8 @@ public class GuiDialog extends GuiScreen {
         super.initGui();
 
         skipMenu.onResize(Minecraft.getMinecraft(), width, height);
+
+        Minecraft.getMinecraft().mouseHelper.ungrabMouseCursor();
     }
 
     @Override

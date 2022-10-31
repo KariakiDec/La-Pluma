@@ -1,6 +1,8 @@
 # La Pluma 羽毛笔
 *为Minecraft所开发的用于呈现交互式文字小说内容的演绎工具*
 
+![La Pluma Logo](src/main/resources/logo.png)
+
 客户端方面基于Forge平台所开发, 主要开发面向版本为Minecraft 1.12.2, 并且Minecraft 1.16.5也在移植中并同步进行更新. 
 
 服务端方面兼容Spigot, 以插件形式运行, 提供较多API与客户端Mod交互。Sponge版本开发中. 
