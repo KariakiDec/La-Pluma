@@ -80,7 +80,6 @@ public class LaPluma {
      */
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        // Command
         ClientCommandHandler.instance.registerCommand(new PlayJournalCommand());
     }
 
