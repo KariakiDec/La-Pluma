@@ -1,14 +1,18 @@
 package cn.earthsky.dev.project.lapluma.common;
 
+import cn.earthsky.dev.project.lapluma.client.event.PlayJournalCommandEvent;
 import cn.earthsky.dev.project.lapluma.client.gui.GuiDialog;
 import cn.earthsky.dev.project.lapluma.client.gui.fx.FXFadeIn;
 import cn.earthsky.dev.project.lapluma.client.gui.fx.FXFadeOut;
 import cn.earthsky.dev.project.lapluma.client.gui.fx.FXShake;
 import cn.earthsky.dev.project.lapluma.common.text.AVGCharacter;
+import cn.earthsky.dev.project.lapluma.common.text.ConversationLoader;
+import cn.earthsky.dev.project.lapluma.common.text.ConversationStructure;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.text.TextComponentString;
 
 public class Functions {
     public final static void doFunction(Parsing parsing, GuiDialog screen){
@@ -73,6 +77,14 @@ public class Functions {
             }
         }else if(parsing.getFunctionName().equalsIgnoreCase("isound")){
 
+        }else if(parsing.getFunctionName().equalsIgnoreCase("continue")) {
+            String journal = Selector.searchNonNull(parsing.getArguments(), "next", "n", "v", "value", "val", "journal", "j", "c", "d", "destination");
+            if (Minecraft.getMinecraft().currentScreen != null && Minecraft.getMinecraft().currentScreen instanceof GuiDialog) {
+                ConversationStructure str = ConversationLoader.loadStructureFromResource(journal);
+                if(str != null) {
+                    ((GuiDialog) Minecraft.getMinecraft().currentScreen).continueStructure(str);
+                }
+            }
         }
     }
 }

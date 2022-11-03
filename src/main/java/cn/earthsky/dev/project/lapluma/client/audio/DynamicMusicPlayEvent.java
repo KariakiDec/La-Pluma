@@ -18,7 +18,6 @@ public class DynamicMusicPlayEvent {
         ISound sound = evt.getSound();
         if(sound instanceof DynamicMusicSound){
             String songUrl = ((DynamicMusicSound) sound).getSongUrl();
-            System.out.println("Will Play: " + songUrl);
             try {
                 evt.getManager().sndSystem.newStreamingSource(false, evt.getUuid(), songUrl,  true,
                         sound.getXPosF(), sound.getYPosF(), sound.getZPosF(), sound.getAttenuationType().getTypeInt(), 16);

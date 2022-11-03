@@ -26,6 +26,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 public class GuiDialog extends GuiScreen {
@@ -51,12 +52,29 @@ public class GuiDialog extends GuiScreen {
     private List<AVGCharacter> avgCharacters = new ArrayList<>();
     private String bgName = "bg";
 
-    private Queue<Runnable> fxBlockingQueue = new LinkedList<>();
+    private Queue<Runnable> fxBlockingQueue = new LinkedBlockingQueue<>();
 
     public void addNMSButtonList(GuiButton button){
         this.buttonList.add(button);
     }
 
+
+
+    boolean hasContinueStructure = false;
+
+    public void continueStructure(ConversationStructure structure){
+        this.structure = structure;
+        this.cursor = -1;
+        this.hideHUD = false;
+        this.showSkipMenu = false;
+        this.centerText = false;
+        this.speaker = "";
+        this.text = "";
+        this.fullText = "";
+        this.hasContinueStructure = true;
+        fxBlockingQueue.forEach(Runnable::run);
+        nextPrompt();
+    }
 
     @Getter @Setter private boolean hideHUD = false;
 
@@ -258,7 +276,11 @@ public class GuiDialog extends GuiScreen {
             }
             if(hasPressed){
                 selectionButtonList.clear();
-                nextPrompt();
+                if(!hasContinueStructure) {
+                    nextPrompt();
+                }else{
+                    hasContinueStructure = false;
+                }
             }else if(selectionButtonList.isEmpty()){
                 if(showSkipMenu){
                     skipMenu.mouseClicked(mouseX, mouseY, mouseButton, this);
