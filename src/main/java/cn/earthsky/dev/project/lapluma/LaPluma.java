@@ -81,7 +81,6 @@ public class LaPluma {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         ClientCommandHandler.instance.registerCommand(new PlayJournalCommand());
-//        KeyLoader.init();
     }
 
     /**
