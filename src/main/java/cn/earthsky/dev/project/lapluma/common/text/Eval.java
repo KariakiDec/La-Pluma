@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Eval {
 
@@ -39,7 +42,7 @@ public class Eval {
     @Value @AllArgsConstructor
     public static class Selection implements EvalResult{
         String selectText;
-        String functionText;
+        String[] functionText;
 
         @Override
         public String getType() {
@@ -47,6 +50,9 @@ public class Eval {
         }
     }
 
+    private static final Pattern FUNCTION_PATTERN = Pattern.compile("(^<([\\s\\S]+)>)"); // 2 - Function
+    private static final Pattern SELECTION_PATTERN = Pattern.compile("((^\\[([\\s\\S]+)\\])(<[\\s\\S]+>)+)"); // 3 - Selection 4 - Functuons
+    private static final Pattern MULTI_FUNCTION = Pattern.compile("(<([\\S\\s]+)>+?)"); // 2 Context
 
     public static List<EvalResult> eval(List<String> lines) {
         List<EvalResult> results = new ArrayList<>();
@@ -58,9 +64,59 @@ public class Eval {
             if(t.isEmpty()){
                 continue;
             }
-            if(t.replaceAll(" ","").isEmpty()){
+            if(t.replaceAll(" ","").isEmpty()) {
                 continue;
             }
+            Matcher selM = SELECTION_PATTERN.matcher(t);
+            if(selM.matches()){ // Selection
+                try {
+                    String selection = selM.group(3);
+                    String funcs = selM.group(4);
+                    Matcher res = MULTI_FUNCTION.matcher(funcs);
+                    if(res.matches()) {
+                        String ctx = res.group(2);
+                        String[] functions = ctx.split("><");
+                        results.add(new Selection(selection, functions));
+                    }else{
+                        Matcher fRes = FUNCTION_PATTERN.matcher(funcs);
+                        if(fRes.matches()){
+                            results.add(new Selection(selection, new String[]{fRes.group(2)}));
+                        }else{
+                            LaPluma.getLogger().log(Level.WARNING,"Illegal syntax of selection prompt: " + t);
+                        }
+                    }
+                }catch (Exception throwable){
+                    LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse selection in conversation", throwable);
+                }
+            }else{
+                Matcher funM = FUNCTION_PATTERN.matcher(t);
+                if(funM.matches()){ // Function
+                    try {
+                        String func = funM.group(2);
+                        results.add(new Function(func));
+                    }catch (Throwable throwable){
+                        LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse function in conversation", throwable);
+                    }
+                }else if (t.contains(":") && !t.startsWith(":")) { // Prompt
+                    try {
+                        String[] array = t.split(":");
+                        String speaker = array[0];
+                        String text = array[1];
+                        if (array.length > 2) {
+                            for (int j = 2; j < array.length; j++) {
+                                text = text.concat(":").concat(array[j]);
+                            }
+                        }
+                        results.add(new Prompt(speaker, Arrays.asList(text.split("\n"))));
+                    }catch (Throwable throwable){
+                        LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse prompt in conversation", throwable);
+                    }
+                }  else if (!t.replaceAll(" ","").startsWith("#")) { // Note
+                    LaPluma.getLogger().log(Level.INFO,"Invalid Conversation Structure: " + t);
+                }
+            }
+
+            /*  Old Code
             if(t.startsWith("[")){ // Selection
                 try {
                     int c = t.lastIndexOf("]");
@@ -69,7 +125,7 @@ public class Eval {
                     if (c < d && d < f && c > 0) {
                         String selectionText = t.substring(1, c);
                         String functionText = t.substring(d + 1, f);
-                        results.add(new Selection(selectionText, functionText));
+                        results.add(new Selection(selectionText, new String[]{functionText}));
                     }else{
                         LaPluma.getLogger().log(Level.INFO,"Illegal syntax of selection prompt: " + t);
                     }
@@ -102,6 +158,10 @@ public class Eval {
             }  else if (!t.replaceAll(" ","").startsWith("#")) { // Note
                 LaPluma.getLogger().log(Level.INFO,"Invalid Conversation Structure: " + t);
             }
+
+             */
+
+
         }
         return results;
     }

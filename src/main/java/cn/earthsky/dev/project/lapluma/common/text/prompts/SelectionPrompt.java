@@ -11,20 +11,22 @@ import java.util.Map;
 
 public class SelectionPrompt implements ConversationPrompt {
 
-    private Map<String, String> selectionFunctions;
+    private Map<String, String[]> selectionFunctions;
     public SelectionPrompt(){
         selectionFunctions = new LinkedHashMap<>();
     }
 
-    public void addSelection(String selectionText, String functionText) {
+    public void addSelection(String selectionText, String... functionText) {
         selectionFunctions.put(selectionText, functionText);
     }
 
     @Override
     public void sendPrompt(GuiDialog screen) {
-        for(Map.Entry<String,String> funcs : selectionFunctions.entrySet()) {
+        for(Map.Entry<String,String[]> funcs : selectionFunctions.entrySet()) {
             screen.addSelection((s) -> {
-                Functions.doFunction(new Parsing(funcs.getValue()), screen);
+                for(String f : funcs.getValue()) {
+                    Functions.doFunction(new Parsing(f), screen);
+                }
             }, funcs.getKey());
         }
     }

@@ -170,6 +170,8 @@ public class GuiDialog extends GuiScreen {
 
     }
 
+
+
     public static ConversationStructure EXAMPLE_STRUCTURE;
 
     public void showText(String speaker, String newText){
@@ -192,7 +194,7 @@ public class GuiDialog extends GuiScreen {
 
         skipMenu.onResize(Minecraft.getMinecraft(), width, height);
 
-        Minecraft.getMinecraft().mouseHelper.ungrabMouseCursor();
+//        Minecraft.getMinecraft().mouseHelper.ungrabMouseCursor();
     }
 
     @Override
@@ -239,6 +241,15 @@ public class GuiDialog extends GuiScreen {
     public void onResize(Minecraft mcIn, int w, int h) {
         super.onResize(mcIn, w, h);
         skipMenu.onResize(mcIn, w, h);
+
+
+        // GuiSelectionButton but = new GuiSelectionButton(size+1, this.width/2 - 100, 30 + size * 25,text);
+        for(int i = 0; i < selectionButtonList.size();i++){
+            GuiSelectionButton but = selectionButtonList.get(i);
+            but.x = this.width/2 - 100;
+            but.y = 30 + i * 25;
+        }
+
     }
 
     public void playPressedSound(){
