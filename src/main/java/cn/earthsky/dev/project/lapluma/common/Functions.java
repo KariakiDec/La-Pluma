@@ -90,6 +90,9 @@ public class Functions {
             Minecraft.getMinecraft().player.sendChatMessage(msg);
         }else if(parsing.getFunctionName().equalsIgnoreCase("reverseSnapshot")){
             screen.reverseSnapshot();
+        }else if(parsing.getFunctionName().equalsIgnoreCase("info")){ // info(title,abstract)
+            String title = Selector.searchNonNull(parsing.getArguments(),"title","t");
+            String abs = Selector.searchNonNull(parsing.getArguments(),"abstract","a","abs","description","desc","d");
         }
     }
 }

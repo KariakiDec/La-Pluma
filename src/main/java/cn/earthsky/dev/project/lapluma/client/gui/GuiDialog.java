@@ -297,69 +297,81 @@ public class GuiDialog extends GuiScreen {
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException{
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        if (mouseButton == 0)
+    public void handleKeyboardInput() throws IOException {
+        super.handleKeyboardInput();
+        if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)){
+            touchScreen(this.width/2, getRectTop() + 25);
+        }
+    }
+
+    private void touchScreen(int mouseX, int mouseY){
+        if(hideHUD){
+            hideHUD = false;
+            return;
+        }
+
+        if(showLog){
+            showLog = false;
+            return;
+        }
+
+        boolean hasPressed = false;
+        for (int i = 0; i < this.selectionButtonList.size(); ++i)
         {
-            if(hideHUD){
-                hideHUD = false;
-                return;
-            }
+            GuiSelectionButton guibutton = this.selectionButtonList.get(i);
 
-            if(showLog){
-                showLog = false;
-                return;
-            }
-
-            boolean hasPressed = false;
-            for (int i = 0; i < this.selectionButtonList.size(); ++i)
+            if (guibutton.mousePressed(this.mc, mouseX, mouseY))
             {
-                GuiSelectionButton guibutton = this.selectionButtonList.get(i);
-
-                if (guibutton.mousePressed(this.mc, mouseX, mouseY))
-                {
-                    playPressedSound();
-                    guibutton.getCallback().accept(this);
-                    logSlider.addLog("  §e[" + guibutton.displayString + "]");
-                    ProxyPacketHandler.sendPacket(3,cursor * 10 + i, structure.getName());
-                    hasPressed = true;
-                }
+                playPressedSound();
+                guibutton.getCallback().accept(this);
+                logSlider.addLog("  §e[" + guibutton.displayString + "]");
+                ProxyPacketHandler.sendPacket(3,cursor * 10 + i, structure.getName());
+                hasPressed = true;
             }
-            if(hasPressed){
-                selectionButtonList.clear();
-                if(!hasContinueStructure) {
-                    nextPrompt();
-                }else{
-                    hasContinueStructure = false;
-                }
-            }else if(selectionButtonList.isEmpty()){
-                if(showSkipMenu){
-                    skipMenu.mouseClicked(mouseX, mouseY, mouseButton, this);
+        }
+        if(hasPressed){
+            selectionButtonList.clear();
+            if(!hasContinueStructure) {
+                nextPrompt();
+            }else{
+                hasContinueStructure = false;
+            }
+        }else if(selectionButtonList.isEmpty()){
+            if(showSkipMenu){
+                skipMenu.mouseClicked(mouseX, mouseY, 0, this);
+            }else {
+                if (mouseY > getRectTop() + 17 && !centerText && !hasFX()) {
+                    // SKIP
+                    if (text.equals(fullText)) {
+                        nextPrompt();
+                    } else {
+                        text = fullText;
+                    }
+                }else if(centerText && Math.abs(mouseY-height/2) < 60){
+                    if (text.equals(fullText)) {
+                        nextPrompt();
+                    } else {
+                        text = fullText;
+                    }
                 }else {
-                    if (mouseY > getRectTop() + 17 && !centerText && !hasFX()) {
-                        // SKIP
-                        if (text.equals(fullText)) {
-                            nextPrompt();
-                        } else {
-                            text = fullText;
-                        }
-                    }else if(centerText && Math.abs(mouseY-height/2) < 60){
-                        if (text.equals(fullText)) {
-                            nextPrompt();
-                        } else {
-                            text = fullText;
-                        }
-                    }else {
-                        for (int i = 0; i < this.smallButtonList.size(); ++i) {
-                            GuiSmallButton guibutton = this.smallButtonList.get(i);
-                            if (guibutton.mousePressed(this.mc, mouseX, mouseY)) {
-                                guibutton.getCallback().run();
-                                playPressedSound();
-                            }
+                    for (int i = 0; i < this.smallButtonList.size(); ++i) {
+                        GuiSmallButton guibutton = this.smallButtonList.get(i);
+                        if (guibutton.mousePressed(this.mc, mouseX, mouseY)) {
+                            guibutton.getCallback().run();
+                            playPressedSound();
                         }
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException{
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        if (mouseButton == 0)
+        {
+           touchScreen(mouseX, mouseY);
         }
     }
 
