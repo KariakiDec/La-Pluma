@@ -51,7 +51,7 @@ public class Eval {
     }
 
     private static final Pattern FUNCTION_PATTERN = Pattern.compile("(^<([\\s\\S]+)>)"); // 2 - Function
-    private static final Pattern SELECTION_PATTERN = Pattern.compile("((^\\[([\\s\\S]+)\\])(<[\\s\\S]+>)+)"); // 3 - Selection 4 - Functuons
+    private static final Pattern SELECTION_PATTERN = Pattern.compile("((^\\[([\\s\\S]+)\\])(<[\\s\\S]+>)*)"); // 3 - Selection 4 - Functuons
     private static final Pattern MULTI_FUNCTION = Pattern.compile("(<([\\S\\s]+)>+?)"); // 2 Context
 
     public static List<EvalResult> eval(List<String> lines) {
@@ -72,18 +72,22 @@ public class Eval {
                 try {
                     String selection = selM.group(3);
                     String funcs = selM.group(4);
-                    Matcher res = MULTI_FUNCTION.matcher(funcs);
-                    if(res.matches()) {
-                        String ctx = res.group(2);
-                        String[] functions = ctx.split("><");
-                        results.add(new Selection(selection, functions));
-                    }else{
-                        Matcher fRes = FUNCTION_PATTERN.matcher(funcs);
-                        if(fRes.matches()){
-                            results.add(new Selection(selection, new String[]{fRes.group(2)}));
-                        }else{
-                            LaPluma.getLogger().log(Level.WARNING,"Illegal syntax of selection prompt: " + t);
+                    if(funcs != null) {
+                        Matcher res = MULTI_FUNCTION.matcher(funcs);
+                        if (res.matches()) {
+                            String ctx = res.group(2);
+                            String[] functions = ctx.split("><");
+                            results.add(new Selection(selection, functions));
+                        } else {
+                            Matcher fRes = FUNCTION_PATTERN.matcher(funcs);
+                            if (fRes.matches()) {
+                                results.add(new Selection(selection, new String[]{fRes.group(2)}));
+                            } else {
+                                LaPluma.getLogger().log(Level.WARNING, "Illegal syntax of selection prompt: " + t);
+                            }
                         }
+                    }else{
+                        results.add(new Selection(selection, new String[]{"none()"}));
                     }
                 }catch (Exception throwable){
                     LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse selection in conversation", throwable);

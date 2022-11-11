@@ -11,6 +11,7 @@ import cn.earthsky.dev.project.lapluma.common.text.AVGCharacter;
 import cn.earthsky.dev.project.lapluma.common.text.ConversationPrompt;
 import cn.earthsky.dev.project.lapluma.common.text.ConversationStructure;
 import cn.earthsky.dev.project.lapluma.common.text.prompts.FunctionPrompt;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -60,13 +61,33 @@ public class GuiDialog extends GuiScreen {
 
 
 
+    @Data
+    private class DialogSnapshot{
+        private int cursor;
+        private final ConversationStructure structure;
+        private final String speaker;
+        private final String text;
+        private final boolean centerText;
+        public DialogSnapshot(){
+            this.structure = GuiDialog.this.structure;
+            this.cursor = GuiDialog.this.cursor;
+            this.speaker = GuiDialog.this.speaker;
+            this.text = GuiDialog.this.text;
+            this.centerText = GuiDialog.this.centerText;
+        }
+    }
+
     boolean hasContinueStructure = false;
 
+    private DialogSnapshot snapshot;
+
     public void continueStructure(ConversationStructure structure){
+        snapshot = new DialogSnapshot();
         this.structure = structure;
         this.cursor = -1;
         this.hideHUD = false;
         this.showSkipMenu = false;
+        this.showLog = false;
         this.centerText = false;
         this.speaker = "";
         this.text = "";
@@ -74,6 +95,25 @@ public class GuiDialog extends GuiScreen {
         this.hasContinueStructure = true;
         fxBlockingQueue.forEach(Runnable::run);
         nextPrompt();
+    }
+
+    public void reverseSnapshot(){
+        if(snapshot != null){
+            final DialogSnapshot recover = snapshot;
+            snapshot = new DialogSnapshot();
+            this.structure = recover.getStructure();
+            this.cursor = recover.getCursor();
+            this.hideHUD = false;
+            this.showSkipMenu = false;
+            this.showLog = false;
+            this.centerText = recover.centerText;
+            this.speaker = recover.getSpeaker();
+            this.text = recover.getText();
+            this.fullText = "";
+            this.hasContinueStructure = true;
+            fxBlockingQueue.forEach(Runnable::run);
+            nextPrompt();
+        }
     }
 
     @Getter @Setter private boolean hideHUD = false;
@@ -331,16 +371,15 @@ public class GuiDialog extends GuiScreen {
 
 
 
+
+
     int cursor = -1;
     private void nextPrompt(){
         if(!hasFX()) {
             cursor++;
             if (cursor >= structure.length()) {
                 setFX(new FXFadeOut(this));
-                fxBlockingQueue.offer(() -> {
-                    Minecraft.getMinecraft().player.closeScreen();
-
-                });
+                fxBlockingQueue.offer(() -> Minecraft.getMinecraft().player.closeScreen());
                 return;
             }
             ConversationPrompt prompt = structure.at(cursor);
@@ -350,16 +389,18 @@ public class GuiDialog extends GuiScreen {
             }
         }else{
             fxBlockingQueue.offer(() -> {
-                cursor++;
-                if (cursor >= structure.length()) {
-                    Minecraft.getMinecraft().player.closeScreen();
+                if(!hasContinueStructure) {
+                    cursor++;
+                    if (cursor >= structure.length()) {
+                        Minecraft.getMinecraft().player.closeScreen();
 
-                    return;
-                }
-                ConversationPrompt prompt = structure.at(cursor);
-                prompt.sendPrompt(this);
-                if (prompt instanceof FunctionPrompt) {
-                    nextPrompt();
+                        return;
+                    }
+                    ConversationPrompt prompt = structure.at(cursor);
+                    prompt.sendPrompt(this);
+                    if (prompt instanceof FunctionPrompt) {
+                        nextPrompt();
+                    }
                 }
             });
         }

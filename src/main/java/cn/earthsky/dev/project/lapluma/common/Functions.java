@@ -88,6 +88,8 @@ public class Functions {
         }else if(parsing.getFunctionName().equalsIgnoreCase("chat")){
             String msg = Selector.searchNonNull(parsing.getArguments(),"m","msg","chat","c","ctx","content","context","value","val","v");
             Minecraft.getMinecraft().player.sendChatMessage(msg);
+        }else if(parsing.getFunctionName().equalsIgnoreCase("reverseSnapshot")){
+            screen.reverseSnapshot();
         }
     }
 }

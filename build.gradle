@@ -17,7 +17,7 @@ apply plugin: "net.minecraftforge.gradle.forge"
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 
 group = 'EarthSkyDev'
-version = '1.1.0-SNAPSHOT'
+version = '1.1.2-SNAPSHOT'
 archivesBaseName = 'La Pluma'
 
 minecraft {
