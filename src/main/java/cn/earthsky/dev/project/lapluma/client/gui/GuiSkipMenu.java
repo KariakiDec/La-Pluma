@@ -1,5 +1,6 @@
 package cn.earthsky.dev.project.lapluma.client.gui;
 
+import lombok.Setter;
 import net.minecraft.client.Minecraft;
 
 public class GuiSkipMenu {
@@ -28,8 +29,8 @@ public class GuiSkipMenu {
     private int noButtonX;
     private int noButtonY;
 
-    private String title = "剧情标题";
-    private String description = "剧情概要，对剧情简短的描述使选择跳过的玩家并不丢失太多情节信息，在Journal文件中通过info(title,abstract)来指定。";
+    @Setter private String title = "剧情标题";
+    @Setter private String description = "剧情概要，对剧情简短的描述使选择跳过的玩家并不丢失太多情节信息，在Journal文件中通过info(title,abstract)来指定。";
 
     private void updatePos(int width, int height){
         this.menuLeft = width/2 - 120;

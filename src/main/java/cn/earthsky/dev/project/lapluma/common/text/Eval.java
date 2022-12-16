@@ -18,6 +18,17 @@ public class Eval {
     public interface EvalResult{
         String getType();
     }
+
+    @Value @AllArgsConstructor
+    public static class Block implements EvalResult{
+        String name;
+        @Singular List<String> body;
+        @Override
+        public String getType() {
+            return "block";
+        }
+    }
+
     @Value @AllArgsConstructor
     public static class Prompt implements EvalResult{
         String speaker;
@@ -56,68 +67,101 @@ public class Eval {
 
     public static List<EvalResult> eval(List<String> lines) {
         List<EvalResult> results = new ArrayList<>();
+        boolean bakingBlock = false;
+        List<String> evalBlock = null;
+        String blockName = "null";
         for (int i = 0; i < lines.size(); i++) {
             String t = lines.get(i).replaceAll("&","§");
-            if (t.startsWith("#")) {
-                continue;
+            while(t.startsWith(" ") && t.length() >= 2){
+                t = t.substring(1);
+                if(t.startsWith(":")){
+                    t = " " + t;
+                    break;
+                }
             }
-            if(t.isEmpty()){
-                continue;
-            }
-            if(t.replaceAll(" ","").isEmpty()) {
-                continue;
-            }
-            Matcher selM = SELECTION_PATTERN.matcher(t);
-            if(selM.matches()){ // Selection
-                try {
-                    String selection = selM.group(3);
-                    String funcs = selM.group(4);
-                    if(funcs != null) {
-                        Matcher res = MULTI_FUNCTION.matcher(funcs);
-                        if (res.matches()) {
-                            String ctx = res.group(2);
-                            String[] functions = ctx.split("><");
-                            results.add(new Selection(selection, functions));
-                        } else {
-                            Matcher fRes = FUNCTION_PATTERN.matcher(funcs);
-                            if (fRes.matches()) {
-                                results.add(new Selection(selection, new String[]{fRes.group(2)}));
+            if(!bakingBlock) {
+                if (t.endsWith("{")) {
+                    bakingBlock = true;
+                    blockName = t.substring(0, t.length()-1);
+                    continue;
+                }
+                if (t.startsWith("#")) {
+                    continue;
+                }
+                if (t.isEmpty()) {
+                    continue;
+                }
+                if (t.replaceAll(" ", "").isEmpty()) {
+                    continue;
+                }
+                Matcher selM = SELECTION_PATTERN.matcher(t);
+                if (selM.matches()) { // Selection
+                    try {
+                        String selection = selM.group(3);
+                        String funcs = selM.group(4);
+                        if (funcs != null) {
+                            Matcher res = MULTI_FUNCTION.matcher(funcs);
+                            if (res.matches()) {
+                                String ctx = res.group(2);
+                                String[] functions = ctx.split("><");
+                                results.add(new Selection(selection, functions));
                             } else {
-                                LaPluma.getLogger().log(Level.WARNING, "Illegal syntax of selection prompt: " + t);
+                                Matcher fRes = FUNCTION_PATTERN.matcher(funcs);
+                                if (fRes.matches()) {
+                                    results.add(new Selection(selection, new String[]{fRes.group(2)}));
+                                } else {
+                                    LaPluma.getLogger().log(Level.WARNING, "Illegal syntax of selection prompt: " + t);
+                                }
                             }
+                        } else {
+                            results.add(new Selection(selection, new String[]{"none()"}));
                         }
-                    }else{
-                        results.add(new Selection(selection, new String[]{"none()"}));
+                    } catch (Exception throwable) {
+                        LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse selection in conversation", throwable);
                     }
-                }catch (Exception throwable){
-                    LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse selection in conversation", throwable);
+                } else {
+                    Matcher funM = FUNCTION_PATTERN.matcher(t);
+                    if (funM.matches()) { // Function
+                        try {
+                            String func = funM.group(2);
+                            results.add(new Function(func));
+                        } catch (Throwable throwable) {
+                            LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse function in conversation", throwable);
+                        }
+                    } else if (t.contains(":") && !t.startsWith(":")) { // Prompt
+                        try {
+                            String[] array = t.split(":");
+                            String speaker = array[0];
+                            String text = array[1];
+                            if (array.length > 2) {
+                                for (int j = 2; j < array.length; j++) {
+                                    text = text.concat(":").concat(array[j]);
+                                }
+                            }
+                            results.add(new Prompt(speaker, Arrays.asList(text.split("\n"))));
+                        } catch (Throwable throwable) {
+                            LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse prompt in conversation", throwable);
+                        }
+                    } else if (!t.replaceAll(" ", "").startsWith("#")) { // Note
+                        LaPluma.getLogger().log(Level.INFO, "Invalid Conversation Structure: " + t);
+                    }
                 }
             }else{
-                Matcher funM = FUNCTION_PATTERN.matcher(t);
-                if(funM.matches()){ // Function
-                    try {
-                        String func = funM.group(2);
-                        results.add(new Function(func));
-                    }catch (Throwable throwable){
-                        LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse function in conversation", throwable);
-                    }
-                }else if (t.contains(":") && !t.startsWith(":")) { // Prompt
-                    try {
-                        String[] array = t.split(":");
-                        String speaker = array[0];
-                        String text = array[1];
-                        if (array.length > 2) {
-                            for (int j = 2; j < array.length; j++) {
-                                text = text.concat(":").concat(array[j]);
-                            }
-                        }
-                        results.add(new Prompt(speaker, Arrays.asList(text.split("\n"))));
-                    }catch (Throwable throwable){
-                        LaPluma.getLogger().log(Level.WARNING, "[Journals] failed to parse prompt in conversation", throwable);
-                    }
-                }  else if (!t.replaceAll(" ","").startsWith("#")) { // Note
-                    LaPluma.getLogger().log(Level.INFO,"Invalid Conversation Structure: " + t);
+                if(evalBlock == null){
+                    evalBlock = new ArrayList<>();
                 }
+                if(t.startsWith("}")){
+                    if(blockName.startsWith("!")){
+                        blockName = blockName.substring(1);
+                        evalBlock.add("<reverseSnapshot()>");
+                    }
+                    results.add(new Block(blockName, new ArrayList<>(evalBlock)));
+                    blockName = "null";
+                    bakingBlock = false;
+                    evalBlock.clear();
+                    continue;
+                }
+                evalBlock.add(t);
             }
 
             /*  Old Code

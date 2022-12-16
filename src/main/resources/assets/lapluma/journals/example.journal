@@ -1,5 +1,6 @@
 <bg(b: empty)>
  :这是一个对话过程的演示
+ :你好, %player_name%!
 <show(avg:person_a, pos: 25)>
 <show(avg:person_b, pos: 100, dim: yes)>
 A: a quick brown fox jumps over the lazy dog 这是A在说话
@@ -10,8 +11,24 @@ A: a quick brown fox jumps over the lazy dog 这是A在说话
 B: a quick brown fox jumps over the lazy dog 这是B在说话
 <color(c: 0xFFFFFFFF)>
  :这是一个选择过程的演示
-[我觉得烤面筋要用95号汽油]<continue(n: s1)><chat(m: 我要吃95号汽油)>
-[我觉得烤面筋要用97号汽油]<continue(n: s2)><chat(m: 我要吃97号汽油)>
-[我觉得烤面筋要用柴油]<continue(n: s3)><chat(m: 我要吃柴油)>
+[我觉得烤面筋要用95号汽油]<continue(n: $this.s1)><chat(m: 我要吃95号汽油)>
+[我觉得烤面筋要用97号汽油]<continue(n: $this.s2)><chat(m: 我要吃97号汽油)>
+[我觉得烤面筋要用柴油]<continue(n: $this.s3)><chat(m: 我要吃柴油)>
  :选择演示结束
  :演示结束
+
+# ! means auto reverse
+!s1{
+ :你选择了95号汽油
+}
+
+
+s2{
+ :你选择了97号汽油
+<reverseSnapshot()>
+# reverse manually
+}
+
+!s3{
+ :你选择了柴油
+}

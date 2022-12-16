@@ -1,6 +1,7 @@
 package cn.earthsky.dev.project.lapluma.common.commands;
 
 import cn.earthsky.dev.project.lapluma.client.event.PlayJournalCommandEvent;
+import cn.earthsky.dev.project.lapluma.common.JournalNamespace;
 import cn.earthsky.dev.project.lapluma.common.text.ConversationLoader;
 import cn.earthsky.dev.project.lapluma.common.text.ConversationStructure;
 import net.minecraft.command.CommandBase;
@@ -30,7 +31,7 @@ public class PlayJournalCommand extends CommandBase {
     public void execute(MinecraftServer minecraftServer, ICommandSender sender, String[] args) throws CommandException {
         if(args.length == 1){
             String journal = args[0];
-            ConversationStructure str = ConversationLoader.loadStructureFromResource(journal);
+            ConversationStructure str = JournalNamespace.get(journal);
             if(str != null){
                 PlayJournalCommandEvent.toOpen = str;
                 sender.sendMessage(new TextComponentString("§9正在读取 " + journal + ".journal"));

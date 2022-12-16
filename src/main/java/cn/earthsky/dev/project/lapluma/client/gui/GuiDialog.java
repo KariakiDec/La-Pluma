@@ -6,6 +6,7 @@ import cn.earthsky.dev.project.lapluma.client.gui.fx.FX;
 import cn.earthsky.dev.project.lapluma.client.gui.fx.FXFade;
 import cn.earthsky.dev.project.lapluma.client.gui.fx.FXFadeOut;
 import cn.earthsky.dev.project.lapluma.client.gui.fx.FXShake;
+import cn.earthsky.dev.project.lapluma.common.network.PlaceholderConnect;
 import cn.earthsky.dev.project.lapluma.common.network.ProxyPacketHandler;
 import cn.earthsky.dev.project.lapluma.common.text.AVGCharacter;
 import cn.earthsky.dev.project.lapluma.common.text.ConversationPrompt;
@@ -36,6 +37,14 @@ public class GuiDialog extends GuiScreen {
     private String text = "";
     private String fullText = "";
 
+
+    public void tryRAUFullText(String original, String newT){
+        if(fullText != null) {
+            if (fullText.equals(original)) {
+                this.fullText = newT;
+            }
+        }
+    }
 
     @Getter private String playingMusic;
 
@@ -220,6 +229,10 @@ public class GuiDialog extends GuiScreen {
             this.speaker = speaker;
         }
         this.fullText = newText;
+
+        if(fullText.contains("%")){
+            PlaceholderConnect.submitRequest(fullText);
+        }
 
         Optional.ofNullable(Minecraft.getMinecraft().world).ifPresent(w -> Optional.ofNullable(Minecraft.getMinecraft().player).ifPresent(p -> w.playSound(p.posX, p.posY, p.posZ, LaPluma.Sounds.BEEP, SoundCategory.MASTER, 0.2f,1f,false)));
 

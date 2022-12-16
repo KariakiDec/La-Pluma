@@ -1,10 +1,10 @@
 package cn.earthsky.dev.project.lapluma;
 
+import cn.earthsky.dev.project.lapluma.common.JournalNamespace;
 import cn.earthsky.dev.project.lapluma.common.commands.PlayJournalCommand;
 import de.cuina.fireandfuel.CodecJLayerMP3;
 import cn.earthsky.dev.project.lapluma.client.gui.GuiDialog;
 import cn.earthsky.dev.project.lapluma.common.network.ProxyPacketHandler;
-import cn.earthsky.dev.project.lapluma.common.text.ConversationLoader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.block.Block;
@@ -87,14 +87,14 @@ public class LaPluma {
      */
     @Mod.EventHandler
     public void postinit(FMLPostInitializationEvent event) {
-        GuiDialog.EXAMPLE_STRUCTURE = ConversationLoader.loadStructureFromResource("example");
+        GuiDialog.EXAMPLE_STRUCTURE = JournalNamespace.get("example");
 
-        ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(resourceManager -> invokeMD5Hash());
+        ((SimpleReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(resourceManager -> preloadResources());
     }
 
     public static boolean hasDialogBubbleProvided = false;
 
-    public static void invokeMD5Hash(){
+    public static void preloadResources(){
         String md5Key = "OUTPUT FAILED";
         // Generate MD5
         try {
@@ -123,6 +123,15 @@ public class LaPluma {
                         }else if(name.endsWith("icon/dialog_bubble.png")){
                             hasDialogBubbleProvided = true;
                         }
+
+                        try {
+                            if (name.endsWith(".journal")) {
+                                String[] group = name.split("/");
+                                String fileName = group[group.length - 1];
+                                String journal = fileName.split("\\.")[0];
+                                getLogger().log(Level.INFO,"Loading Journal {" + journal + "} ........" + (JournalNamespace.get(journal) != null ? "[OK]" : "[FAILED]"));
+                            }
+                        }catch (Throwable ignored){}
                     }
                 }
             }
@@ -147,6 +156,15 @@ public class LaPluma {
                         }else if(name.endsWith("icon/dialog_bubble.png")){
                             hasDialogBubbleProvided = true;
                         }
+
+                        try {
+                            if (name.endsWith(".journal")) {
+                                String[] group = name.split("/");
+                                String fileName = group[group.length - 1];
+                                String journal = fileName.split("\\.")[0];
+                                getLogger().log(Level.INFO,"Loading Journal {" + journal + "} ........" + (JournalNamespace.get(journal) != null ? "[OK]" : "[FAILED]"));
+                            }
+                        }catch (Throwable ignored){}
                     }
                 }
             }
@@ -155,6 +173,7 @@ public class LaPluma {
                 Enumeration<? extends ZipEntry> entries = jar.entries();
                 while (entries.hasMoreElements()) {
                     ZipEntry entry = entries.nextElement();
+
                     String name = entry.getName();
                     if(name.endsWith(".journal") || (name.contains("avg") && name.endsWith(".png"))) {
                         try (InputStream str = jar.getInputStream(entry)) {
@@ -168,6 +187,15 @@ public class LaPluma {
                     }else if(name.endsWith("icon/dialog_bubble.png")){
                         hasDialogBubbleProvided = true;
                     }
+
+                    try {
+                        if (name.endsWith(".journal")) {
+                            String[] group = name.split("/");
+                            String fileName = group[group.length - 1];
+                            String journal = fileName.split("\\.")[0];
+                            getLogger().log(Level.INFO,"Loading Journal {" + journal + "} ........" + (JournalNamespace.get(journal) != null ? "[OK]" : "[FAILED]"));
+                        }
+                    }catch (Throwable ignored){}
                 }
             }
 

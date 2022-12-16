@@ -80,7 +80,7 @@ public class Functions {
         }else if(parsing.getFunctionName().equalsIgnoreCase("continue")) {
             String journal = Selector.searchNonNull(parsing.getArguments(), "next", "n", "v", "value", "val", "journal", "j", "c", "d", "destination");
             if (Minecraft.getMinecraft().currentScreen != null && Minecraft.getMinecraft().currentScreen instanceof GuiDialog) {
-                ConversationStructure str = ConversationLoader.loadStructureFromResource(journal);
+                ConversationStructure str = JournalNamespace.get(journal);
                 if(str != null) {
                     ((GuiDialog) Minecraft.getMinecraft().currentScreen).continueStructure(str);
                 }
@@ -93,6 +93,8 @@ public class Functions {
         }else if(parsing.getFunctionName().equalsIgnoreCase("info")){ // info(title,abstract)
             String title = Selector.searchNonNull(parsing.getArguments(),"title","t");
             String abs = Selector.searchNonNull(parsing.getArguments(),"abstract","a","abs","description","desc","d");
+            screen.getSkipMenu().setTitle(title);
+            screen.getSkipMenu().setDescription(abs);
         }
     }
 }
