@@ -1,7 +1,0 @@
-# Header File
-priority:1
-namespace:foobar
-[child1]<journal(val: SomethingFileName1)>
-[child2]<journal(val: SomethingFileName2)>
-[child3]<avg(val: SomethingImage1, access: private)>
-
