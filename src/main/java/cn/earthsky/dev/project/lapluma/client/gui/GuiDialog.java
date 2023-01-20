@@ -12,6 +12,7 @@ import cn.earthsky.dev.project.lapluma.common.text.AVGCharacter;
 import cn.earthsky.dev.project.lapluma.common.text.ConversationPrompt;
 import cn.earthsky.dev.project.lapluma.common.text.ConversationStructure;
 import cn.earthsky.dev.project.lapluma.common.text.prompts.FunctionPrompt;
+import cn.earthsky.dev.project.lapluma.common.utils.Timestamp;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -124,6 +125,8 @@ public class GuiDialog extends GuiScreen {
             nextPrompt();
         }
     }
+
+    int keepAliveTicks;
 
     @Getter @Setter private boolean hideHUD = false;
 
@@ -252,6 +255,13 @@ public class GuiDialog extends GuiScreen {
 
     @Override
     public void updateScreen(){
+        keepAliveTicks++;
+        if(keepAliveTicks >= 21){
+            keepAliveTicks = 0;
+            int data = Integer.parseInt(cursor + "021" + structure.length());
+            ProxyPacketHandler.sendPacket(23, data,getStructure().getName() + "|" + System.currentTimeMillis());
+        }
+
         if(hasFX()){
             getFX().updateFx();
         }
@@ -336,9 +346,9 @@ public class GuiDialog extends GuiScreen {
             if (guibutton.mousePressed(this.mc, mouseX, mouseY))
             {
                 playPressedSound();
+                ProxyPacketHandler.sendPacket(3,cursor * 10 + i, structure.getName());
                 guibutton.getCallback().accept(this);
                 logSlider.addLog("  §e[" + guibutton.displayString + "]");
-                ProxyPacketHandler.sendPacket(3,cursor * 10 + i, structure.getName());
                 hasPressed = true;
             }
         }

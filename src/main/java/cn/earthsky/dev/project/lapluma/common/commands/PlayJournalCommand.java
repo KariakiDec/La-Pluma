@@ -29,6 +29,9 @@ public class PlayJournalCommand extends CommandBase {
 
     @Override
     public void execute(MinecraftServer minecraftServer, ICommandSender sender, String[] args) throws CommandException {
+        if(minecraftServer.isDedicatedServer()){
+            return;
+        }
         if(args.length == 1){
             String journal = args[0];
             ConversationStructure str = JournalNamespace.get(journal);

@@ -113,10 +113,12 @@ public class ProxyPacketHandler {
             1 - hash合法验证
             2 - 运行function
             9 - papi
+            23 - KeepAlive
     1 int - 附加内容
                0 = 0 空
                0 = 1 是否合法 true 1 / false 0
                0 = 9 PAPI parse编码 index
+               0 = 23 Cursor Index
     2 string - 对话名
      */
 }
